@@ -518,3 +518,12 @@ Since every image is tagged with its version (`v<N>-<commit>`), an older release
 - The supervisor polls every second and `hotfix.sh` waits `RELOAD_WAIT` seconds, so there is a brief window (about 1 to 3 seconds) where the service restarts its process. This is not zero-downtime.
 - The running binary can differ from the binary inside the image until the next full image deploy. The pipeline mitigates this by building the image and extracting the binary from it, so both carry the same version.
 - Jenkins runs as root with the Docker socket mounted. This is for local demonstration only.
+
+There is evidence for this task:
+1. <img width="1600" height="900" alt="WhatsApp Image 2026-09-29 at 23 50 11" src="https://github.com/user-attachments/assets/9984a7c7-ee0e-4e9f-a5f3-488ff5bb28f4" />
+2. This is schema where jenkins build failed <img width="1600" height="900" alt="WhatsApp Image 2026-09-30 at 00 03 54" src="https://github.com/user-attachments/assets/68d0bea5-c0d7-49c8-8430-c449c0f65d96" />
+3. This is schema where jenkins build success <img width="1600" height="900" alt="WhatsApp Image 2026-09-30 at 00 04 24" src="https://github.com/user-attachments/assets/30de7216-3f3a-40a4-ac5f-4a6028ad4528" />
+3. This is evidence when binary update but images doens't update
+4. This is the images sizes <img width="645" height="130" alt="WhatsApp Image 2026-09-30 at 00 10 53" src="https://github.com/user-attachments/assets/b57e599b-3b73-41b3-a57d-f9239ac5ea64" />
+
+
