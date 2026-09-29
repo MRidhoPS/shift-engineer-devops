@@ -5,6 +5,7 @@ set -euo pipefail
 CONTAINER_NAME="${CONTAINER_NAME:-shift-engineer-devops}"
 CONTAINER_BINARY="${CONTAINER_BINARY:-runtime/server}"
 HEALTH_URL="${HEALTH_URL:-http://localhost:8080/health}"
+RELOAD_WAIT="${RELOAD_WAIT:-3}"
 
 BACKUP_FILE="${1:-}"
 
@@ -31,6 +32,8 @@ fi
 
 CONTAINER_ID_BEFORE="$(docker inspect --format '{{.Id}}' "${CONTAINER_NAME}")"
 IMAGE_ID_BEFORE="$(docker inspect --format '{{.Image}}' "${CONTAINER_NAME}")"
+STARTED_BEFORE="$(docker inspect --format '{{.State.StartedAt}}' "${CONTAINER_NAME}")"
+RESTARTS_BEFORE="$(docker inspect --format '{{.RestartCount}}' "${CONTAINER_NAME}")"
 
 echo "========================================"
 echo " Manual Rollback"
@@ -46,11 +49,9 @@ install -m 0755 "${BACKUP_FILE}" "${CONTAINER_BINARY}.tmp"
 mv -f "${CONTAINER_BINARY}.tmp" "${CONTAINER_BINARY}"
 
 echo
-echo "==> Restarting container"
+echo "==> Waiting for supervisor to reload the process (${RELOAD_WAIT}s)"
 
-docker restart "${CONTAINER_NAME}" >/dev/null
-
-sleep 1
+sleep "${RELOAD_WAIT}"
 
 echo
 echo "==> Running health check"
@@ -65,6 +66,8 @@ echo
 
 CONTAINER_ID_AFTER="$(docker inspect --format '{{.Id}}' "${CONTAINER_NAME}")"
 IMAGE_ID_AFTER="$(docker inspect --format '{{.Image}}' "${CONTAINER_NAME}")"
+STARTED_AFTER="$(docker inspect --format '{{.State.StartedAt}}' "${CONTAINER_NAME}")"
+RESTARTS_AFTER="$(docker inspect --format '{{.RestartCount}}' "${CONTAINER_NAME}")"
 
 if [[ "${CONTAINER_ID_BEFORE}" != "${CONTAINER_ID_AFTER}" ]]; then
     echo "ERROR: Container ID changed."
@@ -76,7 +79,13 @@ if [[ "${IMAGE_ID_BEFORE}" != "${IMAGE_ID_AFTER}" ]]; then
     exit 1
 fi
 
+if [[ "${STARTED_BEFORE}" != "${STARTED_AFTER}" || "${RESTARTS_BEFORE}" != "${RESTARTS_AFTER}" ]]; then
+    echo "ERROR: Container was restarted."
+    exit 1
+fi
+
 echo
 echo "Rollback successful."
 echo "Container ID unchanged: ${CONTAINER_ID_AFTER}"
 echo "Image ID unchanged: ${IMAGE_ID_AFTER}"
+echo "Container not restarted: StartedAt=${STARTED_AFTER} RestartCount=${RESTARTS_AFTER}"

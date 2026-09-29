@@ -2,7 +2,7 @@ FROM golang:1.27-alpine AS builder
 
 WORKDIR /src
 
-COPY go.mod go.sum ./
+COPY go.mod go.sum* ./
 RUN go mod download
 
 COPY . .
@@ -18,12 +18,13 @@ RUN CGO_ENABLED=0 \
     -o /out/server \
     ./cmd/server
 
-FROM scratch
+FROM alpine:3.20
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 COPY --from=builder /out/server /app/server
 
 EXPOSE 8080
 
-ENTRYPOINT ["/app/server"] 
-
-
+ENTRYPOINT ["/entrypoint.sh"]
