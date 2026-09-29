@@ -19,7 +19,7 @@ func TestRootEndpoint(t *testing.T) {
 		t.Fatalf("expected status %d, got %d", http.StatusOK, rec.Code)
 	}
 
-	expected := "Hello, DevOps! version=1.0.0"
+	expected := "Hello, shifts DevOps! version=1.0.0"
 
 	if !strings.Contains(rec.Body.String(), expected) {
 		t.Fatalf(
