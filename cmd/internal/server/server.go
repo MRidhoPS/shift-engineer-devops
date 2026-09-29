@@ -10,7 +10,7 @@ func NewHandler(version string) http.Handler {
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
-		fmt.Fprintf(w, "Hello, DevOps! version=%s\n", version)
+		fmt.Fprintf(w, "Hello, shifts DevOps! version=%s\n", version)
 	})
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
