@@ -1,0 +1,10 @@
+.git
+.gitignore
+.github
+.idea
+.vscode
+*.md
+*.log
+bin
+tmp
+coverage
